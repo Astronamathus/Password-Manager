@@ -18,34 +18,34 @@ A simple command-line password manager built in Go. It allows users to store, se
 - Command-line interface (CLI)
 
 ## Project Structure
-main.go - CLI interface (user interaction)
-manager.go - Core logic (add, search, delete, list)
-storage.go - Save/load data from JSON file
-model.go - Credential data structure
+- main.go - CLI interface (user interaction)
+- manager.go - Core logic (add, search, delete, list)
+- storage.go - Save/load data from JSON file
+- model.go - Credential data structure
 
 
 ## How to Run
 
 ### 1. Clone the repository
-git clone https://github.com/your-username/password-manager-go.git
-cd password-manager-go
+`git clone https://github.com/your-username/password-manager-go.git`
+`cd password-manager-go`
 
 ### 2. Run the application
-go run .
+`go run .`
 
 ## Usage
 When you run the program, you will see a menu:
 
-Add a new credential
-View all credentials
-Search by site
-Delete a credential
-View total count
-Exit (auto-saves data)
+1) Add a new credential
+2) View all credentials
+3) Search by site
+4) Delete a credential
+5) View total count
+6) Exit (auto-saves data)
 
 ## Future Improvements
-Encrypt stored passwords
-Improve CLI commands (e.g., add, search, delete)
-Input validation
-Export to CSV
-Multi-user support
+1) Encrypt stored passwords
+2) Improve CLI commands (e.g., add, search, delete)
+3) Input validation
+4) Export to CSV
+5) Multi-user support
