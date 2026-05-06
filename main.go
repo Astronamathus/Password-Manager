@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -117,24 +118,58 @@ func main() {
 				continue
 			}
 
+
 			site := parts[1]
-			result := pm.Search(site)
+			results := pm.SearchAll(site)
 
-			if result != nil {
-				fmt.Println("Username:", result.Username)
-				fmt.Println("Password:", maskPassword(decrypt(result.Password)))
+			if len(results) == 0 {
+				fmt.Println("Not found")
+				continue
+			}
 
-				fmt.Print("Reveal? (y/n): ")
-				choice, _ := reader.ReadString('\n')
+			for i, r := range results {
+				fmt.Printf("%d. %s | %s\n", i+1, r.Username, maskPassword(decrypt(r.Password)))
+			}
 
-				if strings.TrimSpace(choice) == "y" {
-					fmt.Println("Password:", decrypt(result.Password))
-				} else {
-					fmt.Println("Password Masked")
-				}
-				} else {
-					fmt.Println("Not found")
-				}
+			fmt.Print("Select entry to reveal: ")
+			choiceStr, _ := reader.ReadString('\n')
+			choiceStr = strings.TrimSpace(choiceStr)
+
+			choice, err := strconv.Atoi(choiceStr)
+			if err != nil || choice < 1 || choice > len(results) {
+				fmt.Println("Invalid choice")
+				continue
+			}
+
+			selected := results[choice-1]
+			fmt.Println("Username: ", selected.Username)
+			fmt.Println("Password:", decrypt(selected.Password))
+		
+		case "update":
+			if len(parts) < 3 {
+				fmt.Println("Usage: update <site> <username>")
+				continue
+			}
+
+			site := parts[1]
+			user := parts[2]
+
+			fmt.Print("New password (leave empty to generate): ")
+			input, _ := reader.ReadString('\n')
+			newPass := strings.TrimSpace(input)
+
+			if newPass == "" {
+				newPass = generatePassword(12)
+				fmt.Println("Generated password:", newPass)
+			}
+
+			if pm.Update(site, user, encrypt(newPass)) {
+				pm.SaveToFile()
+				fmt.Println("Updated successfully")
+			} else {
+				fmt.Println("Entry not found")
+			}
+
 
 		case "delete":
 			if len(parts) < 2 {

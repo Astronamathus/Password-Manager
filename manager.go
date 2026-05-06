@@ -23,6 +23,30 @@ func (pm *PasswordManager) Search(site string) *Credential {
 	return nil
 }
 
+func (pm *PasswordManager) SearchAll(site string) []Credential {
+	var results []Credential
+
+	for _, c := range pm.credentials {
+		if strings.EqualFold(c.Site, site) {
+			results = append(results, c)
+		}
+	}
+
+	return results
+}
+
+func (pm *PasswordManager) Update(site, username, newPassword string) bool {
+	for i := range pm.credentials {
+		if strings.EqualFold(pm.credentials[i].Site, site) &&
+			strings.EqualFold(pm.credentials[i].Username, username) {
+
+			pm.credentials[i].Password = newPassword
+			return true
+		}
+	}
+	return false
+}
+
 func (pm *PasswordManager) Total() int {
 	return len(pm.credentials)
 }
