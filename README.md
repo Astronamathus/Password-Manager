@@ -44,8 +44,7 @@ When you run the program, you will see a menu:
 6) Exit (auto-saves data)
 
 ## Future Improvements
-1) Encrypt stored passwords
-2) Improve CLI commands (e.g., add, search, delete)
-3) Input validation
-4) Export to CSV
-5) Multi-user support
+1) Copy to clipboard
+2) Fuzzy matching search
+3) Export to CSV
+4) Multi-user support
