@@ -55,23 +55,61 @@ func main() {
 	switch command {
 
 		case "add":
-		if len(parts) < 4 {
-			fmt.Println("Usage: add <site> <username> <password>")
-			continue
-		}
+			var site, user, pass string
 
-		site := parts[1]
-		user := parts[2]
-		pass := parts[3]
+			if len(parts) >= 3 {
+				site = parts[1]
+				user = parts[2]
 
-		pm.Add(Credential{
-			Site:     site,
-			Username: user,
-			Password: encrypt(pass),
-		})
+				// Handle password or --generate
+				if len(parts) >= 4 {
+					if parts[3] == "--generate" {
+						pass = generatePassword(12)
+						fmt.Println("Generated password:", pass)
+					} else {
+						pass = parts[3]
+					}
+				} else {
+					// fallback to interactive password
+					fmt.Print("Password (leave empty to generate): ")
+					input, _ := reader.ReadString('\n')
+					pass = strings.TrimSpace(input)
 
-		pm.SaveToFile()
-		fmt.Println("Added")
+					if pass == "" {
+						pass = generatePassword(12)
+						fmt.Println("Generated password:", pass)
+					}
+				}
+
+			} else {
+				fmt.Print("Site: ")
+				s, _ := reader.ReadString('\n')
+
+				fmt.Print("Username: ")
+				u, _ := reader.ReadString('\n')
+
+				fmt.Print("Password (leave empty to generate): ")
+				p, _ := reader.ReadString('\n')
+
+				site = strings.TrimSpace(s)
+				user = strings.TrimSpace(u)
+				pass = strings.TrimSpace(p)
+
+				if pass == "" {
+					pass = generatePassword(12)
+					fmt.Println("Generated password:", pass)
+				}
+			}
+
+				// Save credential
+				pm.Add(Credential{
+				Site:     site,
+				Username: user,
+				Password: encrypt(pass),
+			})
+	
+			pm.SaveToFile()
+			fmt.Println("Added")
 
 		case "search":
 			if len(parts) < 2 {
@@ -84,7 +122,7 @@ func main() {
 
 			if result != nil {
 				fmt.Println("Username:", result.Username)
-				fmt.Println("Password:", maskPassword(result.Password))
+				fmt.Println("Password:", maskPassword(decrypt(result.Password)))
 
 				fmt.Print("Reveal? (y/n): ")
 				choice, _ := reader.ReadString('\n')
