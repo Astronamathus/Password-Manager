@@ -1,6 +1,10 @@
 package main
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+
+)
 
 type PasswordManager struct {
 	credentials []Credential
@@ -61,6 +65,37 @@ func (pm *PasswordManager) Exists(site, username string) bool {
 	return false
 }
 
+func (pm *PasswordManager) UpdateUsername(site, oldUsername, newUsername string) bool {
+	for i := range pm.credentials {
+		if strings.EqualFold(pm.credentials[i].Site, site) &&
+			strings.EqualFold(pm.credentials[i].Username, oldUsername) {
+
+			// prevent duplicates
+			for _, c := range pm.credentials {
+				if strings.EqualFold(c.Site, site) &&
+					(c.Username == newUsername) {
+					fmt.Println("Username already exists for this site")
+					return false
+				}
+			}
+
+			pm.credentials[i].Username = newUsername
+			return true
+		}
+	}
+	return false
+}
+
+func (pm *PasswordManager) GroupBySite() map[string][]Credential {
+	grouped := make(map[string][]Credential)
+
+	for _, c := range pm.credentials {
+		grouped[c.Site] = append(grouped[c.Site], c)
+	}
+
+	return grouped
+}
+
 func (pm *PasswordManager) Delete(site string) bool {
 	for i:= range pm.credentials { 
 		if strings.EqualFold(pm.credentials[i].Site, site) { 
@@ -70,6 +105,18 @@ func (pm *PasswordManager) Delete(site string) bool {
 	}
 	return false
 
+}
+
+func (pm *PasswordManager) DeleteExact(site, username string) bool {
+	for i := 0; i < len(pm.credentials); i++ {
+		if strings.EqualFold(pm.credentials[i].Site, site) &&
+			strings.EqualFold(pm.credentials[i].Username, username) {
+
+			pm.credentials = append(pm.credentials[:i], pm.credentials[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
 func maskPassword(password string) string {
