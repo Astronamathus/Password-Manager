@@ -40,12 +40,12 @@ func main() {
 			pm.Add(Credential{
 				Site:     strings.TrimSpace(site),
 				Username: strings.TrimSpace(user),
-				Password: strings.TrimSpace(pass),
+				Password: encrypt(strings.TrimSpace(pass)),
 			})
 
 		case 2:
 			for _, c := range pm.GetAll() {
-				fmt.Println(c.Site, "|", c.Username)
+				fmt.Println(c.Site, "|", c.Username, "|", maskPassword(decrypt(c.Password)))
 			}
 
 		case 3:
@@ -56,7 +56,17 @@ func main() {
 
 			if result != nil {
 				fmt.Println("Username:", result.Username)
-				fmt.Println("Password:", result.Password)
+				fmt.Println("Password:", maskPassword(result.Password))
+				fmt.Print("Reveal password? (y/n): ")
+				choice, _ := reader.ReadString('\n')
+				choice = strings.TrimSpace(choice)
+
+				if choice == "y" || choice == "Y" {	
+					fmt.Println("Actual Password:", decrypt(result.Password))
+				} else {
+					fmt.Println("Password masked")
+				}
+				
 			} else {
 				fmt.Println("Not found")
 			}

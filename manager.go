@@ -37,3 +37,7 @@ func (pm *PasswordManager) Delete(site string) bool {
 	return false
 
 }
+
+func maskPassword(password string) string {
+	return strings.Repeat("*", len(password))
+}
