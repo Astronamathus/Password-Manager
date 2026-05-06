@@ -1,0 +1,13 @@
+# Local data files (DO NOT COMMIT)
+auth.json
+data.json
+
+# Optional backups or sensitive exports
+*.backup
+*.json.bak
+
+# OS / editor noise
+.DS_Store
+.idea/
+.vscode/
+
