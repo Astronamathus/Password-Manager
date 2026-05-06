@@ -44,80 +44,84 @@ func main() {
 	}
 
 	for {
-		fmt.Println("\n1. Add")
-		fmt.Println("2. View All")
-		fmt.Println("3. Search")
-		fmt.Println("4. Total")
-		fmt.Println("5. Delete")
-		fmt.Println("6. Exit")
-		fmt.Print("Choose: ")
+	fmt.Print("> ")
 
-		var choice int
-		fmt.Scanln(&choice)
+	line, _ := reader.ReadString('\n')
+	line = strings.TrimSpace(line)
 
-		switch choice {
+	parts := strings.Split(line, " ")
+	command := parts[0]
 
-		case 1:
-			fmt.Print("Site: ")
-			site, _ := reader.ReadString('\n')
+	switch command {
 
-			fmt.Print("Username: ")
-			user, _ := reader.ReadString('\n')
+		case "add":
+		if len(parts) < 4 {
+			fmt.Println("Usage: add <site> <username> <password>")
+			continue
+		}
 
-			fmt.Print("Password: ")
-			pass, _ := reader.ReadString('\n')
+		site := parts[1]
+		user := parts[2]
+		pass := parts[3]
 
-			pm.Add(Credential{
-				Site:     strings.TrimSpace(site),
-				Username: strings.TrimSpace(user),
-				Password: encrypt(strings.TrimSpace(pass)),
-			})
+		pm.Add(Credential{
+			Site:     site,
+			Username: user,
+			Password: encrypt(pass),
+		})
 
-		case 2:
+		pm.SaveToFile()
+		fmt.Println("Added")
+
+		case "search":
+			if len(parts) < 2 {
+				fmt.Println("Usage: search <site>")
+				continue
+			}
+
+			site := parts[1]
+			result := pm.Search(site)
+
+			if result != nil {
+				fmt.Println("Username:", result.Username)
+				fmt.Println("Password:", maskPassword(result.Password))
+
+				fmt.Print("Reveal? (y/n): ")
+				choice, _ := reader.ReadString('\n')
+
+				if strings.TrimSpace(choice) == "y" {
+					fmt.Println("Password:", decrypt(result.Password))
+				} else {
+					fmt.Println("Password Masked")
+				}
+				} else {
+					fmt.Println("Not found")
+				}
+
+		case "delete":
+			if len(parts) < 2 {
+				fmt.Println("Usage: delete <site>")
+				continue
+			}
+
+			if pm.Delete(parts[1]) {
+				pm.SaveToFile()
+				fmt.Println("Deleted")
+			} else {
+				fmt.Println("Not found")
+			}
+	
+		case "list":
 			for _, c := range pm.GetAll() {
 				fmt.Println(c.Site, "|", c.Username, "|", maskPassword(decrypt(c.Password)))
 			}
 
-		case 3:
-			fmt.Print("Enter site: ")
-			site, _ := reader.ReadString('\n')
-
-			result := pm.Search(strings.TrimSpace(site))
-
-			if result != nil {
-				fmt.Println("Username:", result.Username)
-				fmt.Println("Password:", maskPassword(decrypt(result.Password)))
-				fmt.Print("Reveal password? (y/n): ")
-				choice, _ := reader.ReadString('\n')
-				choice = strings.TrimSpace(choice)
-
-				if choice == "y" || choice == "Y" {	
-					fmt.Println("Actual Password:", decrypt(result.Password))
-				} else {
-					fmt.Println("Password masked")
-				}
-				
-			} else {
-				fmt.Println("Not found")
-			}
-
-		case 4:
-			fmt.Println("Total:", pm.Total())
-
-		case 5:
-			fmt.Print("Enter site to delete: ")
-			site, _ := reader.ReadString('\n')
-
-			val := pm.Delete(strings.TrimSpace(site))
-			if val {
-				fmt.Println(site, " deleted from file")
-			} else {
-				fmt.Println(site, " not found on file")
-			}
-		case 6:
+		case "exit":
 			pm.SaveToFile()
 			fmt.Println("Saved. Goodbye.")
 			return
+		default:
+			fmt.Println("Unknown command. Try: add, search, delete, list, exit")
 		}
 	}
 }
