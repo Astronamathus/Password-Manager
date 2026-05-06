@@ -15,10 +15,33 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Enter master password: ")
-	masterPass, _ := reader.ReadString('\n')
-	masterPass = strings.TrimSpace(masterPass)
+	password, _ := reader.ReadString('\n')
+	password = strings.TrimSpace(password)
 
-	deriveKey(masterPass)
+	err := initAuth(password)
+	if err != nil {
+		fmt.Println("Auth failed:", err)
+		return
+	} // Check if auth file exists
+	if _, err := os.Stat("auth.json"); os.IsNotExist(err) {
+		fmt.Println("No user found. Creating new account...")
+
+		err := createAuth(password)
+		if err != nil {
+			fmt.Println("Error creating auth:", err)
+			return
+		}
+
+	fmt.Println("Account created successfully.")
+	} else {
+		err := verifyPassword(password)
+		if err != nil {
+			fmt.Println("Login failed:", err)
+			return
+		}
+
+		fmt.Println("Login successful.")
+	}
 
 	for {
 		fmt.Println("\n1. Add")

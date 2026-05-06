@@ -4,34 +4,24 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
-	"fmt"
 	"io"
-
-	"golang.org/x/crypto/pbkdf2"
 )
 
-var secretKey []byte
-
-func deriveKey(password string) {
-	salt := []byte("fixed-salt") // simple for now
-
-	secretKey = pbkdf2.Key(
-		[]byte(password),
-		salt,
-		100000,
-		32,
-		sha256.New,
-	)
-
-	fmt.Println("Key derived successfully")
-}
-
 func encrypt(text string) string {
-	block, _ := aes.NewCipher(secretKey)
+	if secretKey == nil {
+		panic("secretKey not initialized - login required")
+	}
 
-	gcm, _ := cipher.NewGCM(block)
+	block, err := aes.NewCipher(secretKey)
+	if err != nil {
+		panic(err)
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err)
+	}
 
 	nonce := make([]byte, gcm.NonceSize())
 	io.ReadFull(rand.Reader, nonce)
@@ -48,6 +38,7 @@ func decrypt(encText string) string {
 	gcm, _ := cipher.NewGCM(block)
 
 	nonceSize := gcm.NonceSize()
+
 	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 
 	plaintext, _ := gcm.Open(nil, nonce, ciphertext, nil)
