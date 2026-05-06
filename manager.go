@@ -51,6 +51,16 @@ func (pm *PasswordManager) Total() int {
 	return len(pm.credentials)
 }
 
+func (pm *PasswordManager) Exists(site, username string) bool {
+	for _, c := range pm.credentials {
+		if strings.EqualFold(c.Site, site) &&
+			strings.EqualFold(c.Username, username) {
+			return true
+		}
+	}
+	return false
+}
+
 func (pm *PasswordManager) Delete(site string) bool {
 	for i:= range pm.credentials { 
 		if strings.EqualFold(pm.credentials[i].Site, site) { 

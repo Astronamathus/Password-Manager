@@ -62,6 +62,10 @@ func main() {
 				site = parts[1]
 				user = parts[2]
 
+				if pm.Exists(site, user) {
+					fmt.Println("Entry already exists. Use update command instead.")
+					return
+				}	
 				// Handle password or --generate
 				if len(parts) >= 4 {
 					if parts[3] == "--generate" {
