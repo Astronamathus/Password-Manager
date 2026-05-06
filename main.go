@@ -116,6 +116,10 @@ func main() {
 				fmt.Println(c.Site, "|", c.Username, "|", maskPassword(decrypt(c.Password)))
 			}
 
+		case "generate":
+			pass := generatePassword(12)
+			fmt.Println("Generated password:", pass)
+
 		case "exit":
 			pm.SaveToFile()
 			fmt.Println("Saved. Goodbye.")

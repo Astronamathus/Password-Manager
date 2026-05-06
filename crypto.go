@@ -6,7 +6,21 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"io"
+	"math/big"
 )
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
+
+func generatePassword(length int) string {
+	password := make([]byte, length)
+
+	for i := range password {
+		num, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		password[i] = charset[num.Int64()]
+	}
+
+	return string(password)
+}
 
 func encrypt(text string) string {
 	if secretKey == nil {
