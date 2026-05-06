@@ -45,6 +45,7 @@ When you run the program, you will see a menu:
 
 ## Future Improvements
 1) Copy to clipboard
-2) Fuzzy matching search
-3) Export to CSV
-4) Multi-user support
+2) Fuzzy matching/autocomplete search
+3) Renaming sites
+5) Export to CSV
+6) Multi-user support
