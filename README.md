@@ -35,13 +35,22 @@ A simple command-line password manager built in Go. It allows users to store, se
 
 ## Usage
 When you run the program, you will see a menu:
+# Password Manager CLI - Commands Reference
 
-1) Add a new credential
-2) View all credentials
-3) Search by site
-4) Delete a credential
-5) View total count
-6) Exit (auto-saves data)
+```add / add <site> <username> <psswd/blank>``` - Adds a new credential to the password manager.
+Supports manual password entry or auto-generation by leaving blank.
+
+```search <site>``` - Searches for credentials matching a site.
+
+```update <site> <username>``` - Updates the password for a specific site and username.
+
+```edit-user <site> <old-username>``` - Updates the username for an existing credential.
+
+```delete <site> <username>``` - Deletes a specific credential matching both site and username.
+
+```generate``` - Generates a secure random password and displays it to the user.
+
+```exit``` - Saves all data and exits the application safely.
 
 ## Future Improvements
 1) Copy to clipboard
