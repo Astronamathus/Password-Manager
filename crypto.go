@@ -4,11 +4,29 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"fmt"
 	"io"
+
+	"golang.org/x/crypto/pbkdf2"
 )
 
-var secretKey = []byte("12345678901234567890123456789012") // 32 bytes
+var secretKey []byte
+
+func deriveKey(password string) {
+	salt := []byte("fixed-salt") // simple for now
+
+	secretKey = pbkdf2.Key(
+		[]byte(password),
+		salt,
+		100000,
+		32,
+		sha256.New,
+	)
+
+	fmt.Println("Key derived successfully")
+}
 
 func encrypt(text string) string {
 	block, _ := aes.NewCipher(secretKey)

@@ -8,10 +8,17 @@ import (
 )
 
 func main() {
+	
 	pm := PasswordManager{}
 	pm.LoadFromFile()
 
 	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter master password: ")
+	masterPass, _ := reader.ReadString('\n')
+	masterPass = strings.TrimSpace(masterPass)
+
+	deriveKey(masterPass)
 
 	for {
 		fmt.Println("\n1. Add")
@@ -56,7 +63,7 @@ func main() {
 
 			if result != nil {
 				fmt.Println("Username:", result.Username)
-				fmt.Println("Password:", maskPassword(result.Password))
+				fmt.Println("Password:", maskPassword(decrypt(result.Password)))
 				fmt.Print("Reveal password? (y/n): ")
 				choice, _ := reader.ReadString('\n')
 				choice = strings.TrimSpace(choice)
