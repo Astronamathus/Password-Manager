@@ -48,4 +48,5 @@ When you run the program, you will see a menu:
 2) Fuzzy matching/autocomplete search
 3) Renaming sites
 5) Export to CSV
-6) Multi-user support
+6) Undo functionality
+7) Multi-user support
