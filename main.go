@@ -122,7 +122,6 @@ func main() {
 				continue
 			}
 
-
 			site := parts[1]
 			results := pm.SearchAll(site)
 
@@ -131,14 +130,32 @@ func main() {
 				continue
 			}
 
+			if len(results) == 1 {
+				r := results[0]
+	
+				fmt.Println("Username:", r.Username)
+				fmt.Println("Password:", maskPassword(decrypt(r.Password)))
+				fmt.Println("Reveal Password (y/n)? ")
+				res, _ := reader.ReadString('\n')
+				res = strings.TrimSpace(res)
+
+				if strings.EqualFold(res, "y") {
+					fmt.Println("Username:", r.Username)
+					fmt.Println("Password:", decrypt(r.Password))
+				} else {
+					fmt.Println("Password masked")
+				}	
+					continue
+			}
+
 			for i, r := range results {
 				fmt.Printf("%d. %s | %s\n", i+1, r.Username, maskPassword(decrypt(r.Password)))
 			}
 
-			fmt.Print("Select entry to reveal: ")
+			fmt.Print("Select entry: ")
 			choiceStr, _ := reader.ReadString('\n')
 			choiceStr = strings.TrimSpace(choiceStr)
-
+	
 			choice, err := strconv.Atoi(choiceStr)
 			if err != nil || choice < 1 || choice > len(results) {
 				fmt.Println("Invalid choice")
@@ -146,7 +163,8 @@ func main() {
 			}
 
 			selected := results[choice-1]
-			fmt.Println("Username: ", selected.Username)
+
+			fmt.Println("Username:", selected.Username)
 			fmt.Println("Password:", decrypt(selected.Password))
 		
 		case "update":
