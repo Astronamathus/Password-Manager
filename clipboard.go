@@ -14,3 +14,4 @@ func copyToClipboard(text string) {
 		clipboard.Write(clipboard.FmtText, []byte(""))
 	}()
 }
+

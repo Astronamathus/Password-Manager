@@ -221,6 +221,9 @@ func main() {
 
 			fmt.Println("Password copied to clipboard")
 		
+		case "help", "h", "?":
+			printHelp()
+		
 		case "update":
 			if len(parts) < 3 {
 				fmt.Println("Usage: update <site> <username>")
