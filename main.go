@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"golang.design/x/clipboard"
+
 )
 
 func main() {
@@ -43,6 +45,12 @@ func main() {
 		}
 
 		fmt.Println("Login successful.")
+	}
+
+	err = clipboard.Init()
+	if err != nil {
+		fmt.Println("Clipboard initialization failed:", err)
+		return
 	}
 
 	for {
@@ -167,6 +175,51 @@ func main() {
 
 			fmt.Println("Username:", selected.Username)
 			fmt.Println("Password:", decrypt(selected.Password))
+
+		case "copy":
+			if len(parts) < 2 {
+				fmt.Println("Usage: copy <site> [username]")
+				continue
+			}
+
+			site := parts[1]
+			results := pm.SearchAll(site)
+		
+			if len(results) == 0 {
+				fmt.Println("No entries found")
+				continue
+			}
+
+			if len(results) == 1 {
+				r := results[0]
+				password := decrypt(r.Password)
+				copyToClipboard(password)
+
+				fmt.Println("Password copied to clipboard")
+				continue
+			}
+
+			for i, r := range results {
+				fmt.Printf("%d. %s\n", i+1, r.Username)
+			}
+
+			fmt.Print("Select entry: ")
+			choiceStr, _ := reader.ReadString('\n')
+			choiceStr = strings.TrimSpace(choiceStr)
+
+			choice, err := strconv.Atoi(choiceStr)
+			if err != nil || choice < 1 || choice > len(results) {
+				fmt.Println("Invalid choice")
+				continue
+			}
+
+			selected := results[choice-1]
+
+			password := decrypt(selected.Password)
+
+			copyToClipboard(password)
+
+			fmt.Println("Password copied to clipboard")
 		
 		case "update":
 			if len(parts) < 3 {
