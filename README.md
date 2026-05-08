@@ -53,9 +53,8 @@ Supports manual password entry or auto-generation by leaving blank.
 ```exit``` - Saves all data and exits the application safely.
 
 ## Future Improvements
-1) Copy to clipboard
-2) Fuzzy matching/autocomplete search
-3) Renaming sites
-5) Export to CSV
-6) Undo functionality
-7) Multi-user support
+1) Fuzzy matching/autocomplete search
+2) Renaming sites
+3) Export to CSV
+4) Undo functionality
+5) Multi-user support
