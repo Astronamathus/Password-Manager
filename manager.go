@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strings"
-
 )
 
 type PasswordManager struct {
@@ -17,6 +16,7 @@ func (pm *PasswordManager) Add(cred Credential) {
 func (pm *PasswordManager) GetAll() []Credential {
 	return pm.credentials
 }
+
 
 func (pm *PasswordManager) Search(site string) *Credential {
 	for i := range pm.credentials {
@@ -121,4 +121,15 @@ func (pm *PasswordManager) DeleteExact(site, username string) bool {
 
 func maskPassword(password string) string {
 	return strings.Repeat("*", len(password))
+}
+func success(msg string) {
+	fmt.Println(Green + msg + Reset)
+}
+
+func errorMsg(msg string) {
+	fmt.Println(Red + msg + Reset)
+}
+
+func info(msg string) {
+	fmt.Println(Cyan + msg + Reset)
 }

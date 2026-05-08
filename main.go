@@ -7,62 +7,63 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"golang.design/x/clipboard"
 
+	"golang.design/x/clipboard"
 )
 
 func main() {
-	
+
 	pm := PasswordManager{}
 	pm.LoadFromFile()
 
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Print("Enter master password: ")
+	fmt.Print(Cyan + "Enter master password: " + Reset)
 	password, _ := reader.ReadString('\n')
 	password = strings.TrimSpace(password)
 
 	err := initAuth(password)
 	if err != nil {
-		fmt.Println("Auth failed:", err)
+		errorMsg("Auth failed: " + err.Error())
 		return
-	} // Check if auth file exists
+	}
+
 	if _, err := os.Stat("auth.json"); os.IsNotExist(err) {
-		fmt.Println("No user found. Creating new account...")
+		info("No user found. Creating new account...")
 
 		err := createAuth(password)
 		if err != nil {
-			fmt.Println("Error creating auth:", err)
+			errorMsg("Error creating auth: " + err.Error())
 			return
 		}
 
-	fmt.Println("Account created successfully.")
+		success("Account created successfully.")
 	} else {
 		err := verifyPassword(password)
 		if err != nil {
-			fmt.Println("Login failed:", err)
+			errorMsg("Login failed: " + err.Error())
 			return
 		}
 
-		fmt.Println("Login successful.")
+		success("Login successful.")
 	}
 
 	err = clipboard.Init()
 	if err != nil {
-		fmt.Println("Clipboard initialization failed:", err)
+		errorMsg("Clipboard initialization failed")
 		return
 	}
 
 	for {
-	fmt.Print("> ")
+		fmt.Print(Blue + "> " + Reset)
 
-	line, _ := reader.ReadString('\n')
-	line = strings.TrimSpace(line)
+		line, _ := reader.ReadString('\n')
+		line = strings.TrimSpace(line)
 
-	parts := strings.Split(line, " ")
-	command := parts[0]
+		parts := strings.Split(line, " ")
+		command := parts[0]
 
-	switch command {
+		switch command {
 
 		case "add":
 			var site, user, pass string
@@ -72,26 +73,25 @@ func main() {
 				user = parts[2]
 
 				if pm.Exists(site, user) {
-					fmt.Println("Entry already exists. Use update command instead.")
-					return
-				}	
-				// Handle password or --generate
+					errorMsg("Entry already exists. Use update instead.")
+					continue
+				}
+
 				if len(parts) >= 4 {
 					if parts[3] == "--generate" {
 						pass = generatePassword(12)
-						fmt.Println("Generated password:", pass)
+						info("Generated password: " + pass)
 					} else {
 						pass = parts[3]
 					}
 				} else {
-					// fallback to interactive password
 					fmt.Print("Password (leave empty to generate): ")
 					input, _ := reader.ReadString('\n')
 					pass = strings.TrimSpace(input)
 
 					if pass == "" {
 						pass = generatePassword(12)
-						fmt.Println("Generated password:", pass)
+						info("Generated password: " + pass)
 					}
 				}
 
@@ -111,23 +111,22 @@ func main() {
 
 				if pass == "" {
 					pass = generatePassword(12)
-					fmt.Println("Generated password:", pass)
+					info("Generated password: " + pass)
 				}
 			}
 
-				// Save credential
-				pm.Add(Credential{
+			pm.Add(Credential{
 				Site:     site,
 				Username: user,
 				Password: encrypt(pass),
 			})
-	
+
 			pm.SaveToFile()
-			fmt.Println("Added")
+			success("Added successfully")
 
 		case "search":
 			if len(parts) < 2 {
-				fmt.Println("Usage: search <site>")
+				errorMsg("Usage: search <site>")
 				continue
 			}
 
@@ -135,26 +134,26 @@ func main() {
 			results := pm.SearchAll(site)
 
 			if len(results) == 0 {
-				fmt.Println("Not found")
+				errorMsg("Not found")
 				continue
 			}
 
 			if len(results) == 1 {
 				r := results[0]
-	
-				fmt.Println("Username:", r.Username)
-				fmt.Println("Password:", maskPassword(decrypt(r.Password)))
-				fmt.Println("Reveal Password (y/n)? ")
+
+				fmt.Println(Cyan + "Username: " + Reset + r.Username)
+				fmt.Println(Cyan + "Password: " + Reset + maskPassword(decrypt(r.Password)))
+
+				fmt.Print("Reveal Password (y/n)? ")
 				res, _ := reader.ReadString('\n')
 				res = strings.TrimSpace(res)
 
 				if strings.EqualFold(res, "y") {
-					fmt.Println("Username:", r.Username)
-					fmt.Println("Password:", decrypt(r.Password))
+					fmt.Println(decrypt(r.Password))
 				} else {
-					fmt.Println("Password masked")
-				}	
-					continue
+					info("Password masked")
+				}
+				continue
 			}
 
 			for i, r := range results {
@@ -164,38 +163,44 @@ func main() {
 			fmt.Print("Select entry: ")
 			choiceStr, _ := reader.ReadString('\n')
 			choiceStr = strings.TrimSpace(choiceStr)
-	
+
 			choice, err := strconv.Atoi(choiceStr)
 			if err != nil || choice < 1 || choice > len(results) {
-				fmt.Println("Invalid choice")
+				errorMsg("Invalid choice")
 				continue
 			}
 
 			selected := results[choice-1]
 
-			fmt.Println("Username:", selected.Username)
-			fmt.Println("Password:", decrypt(selected.Password))
+			fmt.Println(Cyan + "Username: " + Reset + selected.Username)
+
+			fmt.Print("Reveal password? (y/n): ")
+			res, _ := reader.ReadString('\n')
+			res = strings.TrimSpace(res)
+
+			if strings.EqualFold(res, "y") {
+				fmt.Println(decrypt(selected.Password))
+			} else {
+				info("Password masked")
+			}
 
 		case "copy":
 			if len(parts) < 2 {
-				fmt.Println("Usage: copy <site> [username]")
+				errorMsg("Usage: copy <site> [username]")
 				continue
 			}
 
 			site := parts[1]
 			results := pm.SearchAll(site)
-		
+
 			if len(results) == 0 {
-				fmt.Println("No entries found")
+				errorMsg("No entries found")
 				continue
 			}
 
 			if len(results) == 1 {
-				r := results[0]
-				password := decrypt(r.Password)
-				copyToClipboard(password)
-
-				fmt.Println("Password copied to clipboard")
+				copyToClipboard(decrypt(results[0].Password))
+				success("Password copied to clipboard")
 				continue
 			}
 
@@ -209,24 +214,21 @@ func main() {
 
 			choice, err := strconv.Atoi(choiceStr)
 			if err != nil || choice < 1 || choice > len(results) {
-				fmt.Println("Invalid choice")
+				errorMsg("Invalid choice")
 				continue
 			}
 
 			selected := results[choice-1]
+			copyToClipboard(decrypt(selected.Password))
 
-			password := decrypt(selected.Password)
+			success("Password copied to clipboard")
 
-			copyToClipboard(password)
-
-			fmt.Println("Password copied to clipboard")
-		
 		case "help", "h", "?":
 			printHelp()
-		
+
 		case "update":
 			if len(parts) < 3 {
-				fmt.Println("Usage: update <site> <username>")
+				errorMsg("Usage: update <site> <username>")
 				continue
 			}
 
@@ -239,19 +241,19 @@ func main() {
 
 			if newPass == "" {
 				newPass = generatePassword(12)
-				fmt.Println("Generated password:", newPass)
+				info("Generated password: " + newPass)
 			}
 
 			if pm.Update(site, user, encrypt(newPass)) {
 				pm.SaveToFile()
-				fmt.Println("Updated successfully")
+				success("Updated successfully")
 			} else {
-				fmt.Println("Entry not found")
+				errorMsg("Entry not found")
 			}
 
 		case "edit-user":
 			if len(parts) < 3 {
-				fmt.Println("Usage: edit-user <site> <old-username>")
+				errorMsg("Usage: edit-user <site> <old-username>")
 				continue
 			}
 
@@ -263,24 +265,23 @@ func main() {
 			newUser := strings.TrimSpace(input)
 
 			if newUser == "" {
-				fmt.Println("Username cannot be empty")
+				errorMsg("Username cannot be empty")
 				continue
 			}
 
 			if pm.UpdateUsername(site, oldUser, newUser) {
 				pm.SaveToFile()
-				fmt.Println("Username updated successfully")
+				success("Username updated successfully")
 			} else {
-				fmt.Println("Entry not found")
+				errorMsg("Entry not found")
 			}
-
 
 		case "delete":
 			if len(parts) < 2 {
-				fmt.Println("Usage: delete <site> [username]")
+				errorMsg("Usage: delete <site> [username]")
 				continue
 			}
-	
+
 			site := parts[1]
 
 			if len(parts) >= 3 {
@@ -288,9 +289,9 @@ func main() {
 
 				if pm.DeleteExact(site, user) {
 					pm.SaveToFile()
-					fmt.Println("Deleted successfully")
+					success("Deleted successfully")
 				} else {
-					fmt.Println("Entry not found")
+					errorMsg("Entry not found")
 				}
 				continue
 			}
@@ -298,13 +299,13 @@ func main() {
 			results := pm.SearchAll(site)
 
 			if len(results) == 0 {
-				fmt.Println("No entries found")
+				errorMsg("No entries found")
 				continue
 			}
 
 			if len(results) == 1 {
 				r := results[0]
-	
+
 				fmt.Printf("Delete %s (%s)? (y/n): ", r.Site, r.Username)
 				confirm, _ := reader.ReadString('\n')
 				confirm = strings.TrimSpace(confirm)
@@ -312,35 +313,33 @@ func main() {
 				if strings.EqualFold(confirm, "y") {
 					pm.DeleteExact(site, r.Username)
 					pm.SaveToFile()
-					fmt.Println("Deleted")
+					success("Deleted")
 				} else {
-					fmt.Println("Cancelled, Password saved")
+					info("Cancelled")
 				}
 				continue
 			}
 
-			// psswd mangr
 			for i, r := range results {
 				fmt.Printf("%d. %s\n", i+1, r.Username)
 			}
 
-			fmt.Print("Select entry to delete: ")
+			fmt.Print("Select entry: ")
 			choiceStr, _ := reader.ReadString('\n')
 			choiceStr = strings.TrimSpace(choiceStr)
 
 			choice, err := strconv.Atoi(choiceStr)
 			if err != nil || choice < 1 || choice > len(results) {
-				fmt.Println("Invalid choice")
+				errorMsg("Invalid choice")
 				continue
 			}
 
 			selected := results[choice-1]
-
 			pm.DeleteExact(site, selected.Username)
 			pm.SaveToFile()
 
-			fmt.Println("Deleted successfully")
-	
+			success("Deleted successfully")
+
 		case "list":
 			grouped := pm.GroupBySite()
 
@@ -353,13 +352,7 @@ func main() {
 			for _, site := range sites {
 				creds := grouped[site]
 
-				if len(creds) == 1 {
-					c := creds[0]
-					fmt.Println(site, "|", c.Username, "|", maskPassword(decrypt(c.Password)))
-					continue
-				}
-
-				fmt.Println(site + ":")
+				fmt.Println(Bold + Cyan + site + ":" + Reset)
 
 				for _, c := range creds {
 					fmt.Printf("  - %s | %s\n", c.Username, maskPassword(decrypt(c.Password)))
@@ -370,14 +363,15 @@ func main() {
 
 		case "generate":
 			pass := generatePassword(12)
-			fmt.Println("Generated password:", pass)
+			fmt.Println(Green + "Generated password: " + Reset + pass)
 
 		case "exit":
 			pm.SaveToFile()
-			fmt.Println("Saved. Goodbye.")
+			success("Saved. Goodbye.")
 			return
+
 		default:
-			fmt.Println("Unknown command. Try: add, search, delete, list, exit")
+			errorMsg("Unknown command. Type help")
 		}
 	}
 }

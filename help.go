@@ -3,49 +3,44 @@ package main
 import "fmt"
 
 func printHelp() {
-	fmt.Println(`
-Available Commands
+	fmt.Println(Bold + Cyan + "\nPassword Manager Commands\n" + Reset)
 
-add
-  Add a new credential interactively
+	fmt.Println(Green + "add" + Reset)
+	fmt.Println("  Add a new credential interactively\n")
 
-add <site> <username> <password>
-  Add a credential directly from CLI
+	fmt.Println(Green + "add <site> <username> <password>" + Reset)
+	fmt.Println("  Add credential directly from CLI\n")
 
-add <site> <username> --generate
-  Generate a secure password automatically
+	fmt.Println(Green + "add <site> <username> --generate" + Reset)
+	fmt.Println("  Generate a secure password automatically\n")
 
-search <site>
-  Search credentials by site
+	fmt.Println(Green + "search <site>" + Reset)
+	fmt.Println("  Search credentials by site\n")
 
-update <site> <username>
-  Update password for an entry
+	fmt.Println(Green + "update <site> <username>" + Reset)
+	fmt.Println("  Update password for an entry\n")
 
-edit-user <site> <old-username>
-  Change username for an existing entry
+	fmt.Println(Green + "edit-user <site> <old-username>" + Reset)
+	fmt.Println("  Change username for an existing entry\n")
 
-delete <site>
-  Delete credential(s) for a site
+	fmt.Println(Green + "delete <site>" + Reset)
+	fmt.Println("  Delete credentials for a site\n")
 
-delete <site> <username>
-  Delete a specific credential
+	fmt.Println(Green + "delete <site> <username>" + Reset)
+	fmt.Println("  Delete a specific credential\n")
 
-list
-  List all saved credentials
+	fmt.Println(Green + "list" + Reset)
+	fmt.Println("  List all saved credentials\n")
 
-generate
-  Generate a secure random password
+	fmt.Println(Green + "generate" + Reset)
+	fmt.Println("  Generate a secure random password\n")
 
-copy <site>
-  Copy password to clipboard
+	fmt.Println(Green + "copy <site>" + Reset)
+	fmt.Println("  Copy password to clipboard\n")
 
-copy <site> <username>
-  Copy specific account password to clipboard
+	fmt.Println(Green + "help" + Reset)
+	fmt.Println("  Show this help menu\n")
 
-help
-  Show this help menu
-
-exit
-  Save and exit the application
-`)
+	fmt.Println(Green + "exit" + Reset)
+	fmt.Println("  Save and exit the application\n")
 }
